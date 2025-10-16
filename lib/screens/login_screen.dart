@@ -2,46 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // Key untuk validasi form login
   final _formKey = GlobalKey<FormState>();
+
+  // Controller input pengguna
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isObscure = true;
+  bool _isObscure = true; // Untuk toggle visibility password
 
+  // Fungsi untuk proses login menggunakan SharedPreferences
   Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-      final prefs = await SharedPreferences.getInstance();
-      final savedUsername = prefs.getString('username');
-      final savedPassword = prefs.getString('password');
+    if (!_formKey.currentState!.validate()) return;
 
-      if (_usernameController.text == savedUsername &&
-          _passwordController.text == savedPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login berhasil!'),
-            backgroundColor: Colors.green[700],
-          ),
-        );
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Username atau password salah!'),
-            backgroundColor: Colors.red[600],
-          ),
-        );
-      }
+    final prefs = await SharedPreferences.getInstance();
+    final savedUsername = prefs.getString('username');
+    final savedPassword = prefs.getString('password');
+
+    if (!mounted) return; // Hindari error jika widget sudah tidak aktif
+
+    // Verifikasi username & password dari data lokal
+    if (_usernameController.text == savedUsername &&
+        _passwordController.text == savedPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Login berhasil!'),
+          backgroundColor: Colors.green[700],
+        ),
+      );
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Username atau password salah!'),
+          backgroundColor: Colors.red[600],
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Tampilan halaman login
     return Scaffold(
-      // Background gradien hijau lembut
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -60,19 +69,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Logo dan Judul
                       Hero(
                         tag: 'logo',
                         child: Image.asset('assets/images/logo.png', height: 90),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Text(
                         "Login Rumah Sakit",
                         style: TextStyle(
@@ -81,16 +88,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.green[800],
                         ),
                       ),
-                      SizedBox(height: 30),
-
-                      // Input Username
+                      const SizedBox(height: 30),
+                      // Input username
                       TextFormField(
                         controller: _usernameController,
                         decoration: InputDecoration(
                           labelText: 'Username',
-                          labelStyle: TextStyle(color: Colors.green[800]),
-                          prefixIcon:
-                              Icon(Icons.person, color: Colors.green[700]),
+                          prefixIcon: Icon(Icons.person, color: Colors.green[700]),
                           filled: true,
                           fillColor: Colors.green[50],
                           border: OutlineInputBorder(
@@ -98,34 +102,25 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderSide: BorderSide.none,
                           ),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Masukkan username';
-                          }
-                          return null;
-                        },
+                        validator: (value) =>
+                            value == null || value.isEmpty ? 'Masukkan username' : null,
                       ),
-                      SizedBox(height: 15),
-
-                      // Input Password
+                      const SizedBox(height: 15),
+                      // Input password
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _isObscure,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          labelStyle: TextStyle(color: Colors.green[800]),
                           prefixIcon: Icon(Icons.lock, color: Colors.green[700]),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _isObscure
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
+                              _isObscure ? Icons.visibility_off : Icons.visibility,
                               color: Colors.green[700],
                             ),
                             onPressed: () {
-                              setState(() {
-                                _isObscure = !_isObscure;
-                              });
+                              // Menampilkan atau menyembunyikan password
+                              setState(() => _isObscure = !_isObscure);
                             },
                           ),
                           filled: true,
@@ -135,16 +130,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderSide: BorderSide.none,
                           ),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Masukkan password';
-                          }
-                          return null;
-                        },
+                        validator: (value) =>
+                            value == null || value.isEmpty ? 'Masukkan password' : null,
                       ),
-                      SizedBox(height: 25),
-
-                      // Tombol Login
+                      const SizedBox(height: 25),
+                      // Tombol masuk
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -154,10 +144,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            elevation: 5,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: Text(
+                          child: const Text(
                             'MASUK',
                             style: TextStyle(
                               color: Colors.white,
@@ -168,8 +157,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
+                      // Navigasi ke halaman register
                       TextButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/register');
@@ -179,12 +168,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(color: Colors.green[800]),
                         ),
                       ),
-
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       Text(
                         "© 2025 Rumah Sakit Harapan Bunda",
-                        style: TextStyle(
-                            fontSize: 12, color: Colors.grey.shade600),
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                       ),
                     ],
                   ),
